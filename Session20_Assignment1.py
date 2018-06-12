@@ -1,0 +1,37 @@
+import numpy as np
+import pandas as pd
+import random
+from numpy.random import permutation
+from sklearn.neighbors import KNeighborsRegressor
+import math
+import matplotlib.pyplot as plt
+
+url="d:/nba_2013.csv"
+nba = pd.read_csv(url)
+random_indices = permutation(nba.index)
+test_cutoff = math.floor(len(nba)/3)
+test = nba.loc[random_indices[1:test_cutoff]]
+train = nba.loc[random_indices[test_cutoff:]]
+
+x_columns = ['age', 'g', 'gs', 'mp', 'fg', 'fga', 'fg.', 'x3p', 'x3pa', 'x3p.', 'x2p', 'x2pa', 'x2p.', 'efg.', 'ft', 'fta', 'ft.', 'orb', 'drb', 'trb', 'ast', 'stl', 'blk', 'tov', 'pf']
+y_column = ["pts"]
+
+knn = KNeighborsRegressor(n_neighbors=5)
+train[x_columns] = np.nan_to_num(train[x_columns])
+test[x_columns] = np.nan_to_num(test[x_columns])
+knn.fit(train[x_columns], train[y_column])
+predictions = knn.predict(test[x_columns])
+
+actual = test[y_column]
+mse = (((predictions - actual) ** 2).sum()) / len(predictions)
+print(mse)
+
+%matplotlib inline
+width = 25
+height = 6
+plt.figure(figsize=(width, height))
+plt.xticks(rotation='vertical')
+plt.scatter(actual, predictions)
+plt.xlabel('Measured')
+plt.ylabel('Predicted')
+plt.show()
